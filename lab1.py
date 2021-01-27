@@ -6,31 +6,61 @@ import operator
 from sklearn.model_selection import train_test_split
 
 
-def euclidean_distance(inst1, inst2, length):
+# +
+def euclidean_distance(vecA, vecB):
     distance = 0
-    for x in range(length):
-        distance += pow((inst1[x]) - inst2[x], 2)
+    for x in range(len(vecB)):
+        distance += pow((vecA[x]) - vecB[x], 2)
     return math.sqrt(distance)
 
 
-def hamming_distance(inst1, inst2, length):
+# +
+def manhattan_distance(vecA, vecB):
     distance = 0
-    for x in range(length):
-        distance += abs((inst1[x]) - inst2[x])
+    for x in range(len(vecB)):
+        distance += abs((vecA[x]) - vecB[x])
     return distance
 
 
-def manhattan_distance(inst1, inst2, length):
-    distance = 0
-    for x in range(length):
-        distance += abs()
+# is simply the proportion of disagreeing components
+def hamming_distance(vecA, vecB):
+    # intersect = list(set(vecA) & set(vecB))
+    cnt = 0
+    for x in range(len(vecA)):
+        if vecA[x] != vecB[x]:
+            cnt += 1
+    return cnt / len(vecB)
+
+
+# 1 - (a&b/(a+b-a&b))
+def jaccard_distance(vecA, vecB):
+    def jaccard_index(vecA, vecB):
+        intersect = list(set(vecA) & set(vecB))
+        # np.intersect1d
+        size_i = len(intersect)
+        size_a = len(vecA)
+        size_b = len(vecB)
+        index = size_i / (size_a + size_b - size_i)
+        return index
+
+    return 1 - jaccard_index(vecA, vecB)
+
+
+# +
+def cos_distance(vecA, vecB):
+    def dotProduct(vecA, vecB):
+        distance = 0
+        for x in range(len(vecB)):
+            distance += vecA[x] * vecB[x]
+        return distance
+
+    return 1 - dotProduct(vecA, vecB) / math.sqrt(dotProduct(vecA, vecA)) / math.sqrt(dotProduct(vecB, vecB))
 
 
 def get_neighbors(train, test, k):
     distances = []
-    length = len(test) - 1
     for x in range(len(train)):
-        dist = euclidean_distance(test, train[x], length)
+        dist = euclidean_distance(np.delete(test, -1), np.delete(train[x], -1))
         distances.append((train[x], dist))
     distances.sort(key=operator.itemgetter(1))
     neighbors = []
@@ -49,6 +79,14 @@ def get_classes(neighbors):
             class_votes[response] = 1
     sorted_votes = sorted(class_votes.items(), key=operator.itemgetter(1), reverse=True)
     return sorted_votes[0][0]
+
+
+def get_accuracy(test, predict):
+    cnt = 0
+    for x in range(len(test)):
+        if test[x][-1] == predict[x]:
+            cnt += 1
+    return (cnt / float(len(test))) * 100.0
 
 
 def read_file(file):
@@ -70,9 +108,15 @@ def main():
     # print('Test set' + test_set)
     # print ('Train set len: ' + repr(len(train_set)))
     # print ('Test set len: ' + repr(len(test_set)))
+    predict_result = []
     for x in range(len(test_set)):
         neighbors = get_neighbors(train_set, test_set[x], 3)
         print(neighbors)
         result = get_classes(neighbors)
+        predict_result.append(result)
+        print('predicted = ' + repr(result) + ',actual = ' + repr(test_set[x][-1]))
+    accuracy = get_accuracy(test_set, predict_result)
+    print('Точность: ' + repr(accuracy) + '%')
+
 
 main()
