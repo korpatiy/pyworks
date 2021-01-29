@@ -35,14 +35,10 @@ def hamming_distance(vecA, vecB):
 # 1 - (a&b/(a+b-a&b))
 def jaccard_distance(vecA, vecB):
     def jaccard_index(vecA, vecB):
-        intersect = list(set(vecA) & set(vecB))
-        # np.intersect1d
-        size_i = len(intersect)
-        size_a = len(vecA)
-        size_b = len(vecB)
-        index = size_i / (size_a + size_b - size_i)
+        intersect = np.intersect1d(vecA, vecB)
+        union = np.union1d(vecA, vecB)
+        index = len(intersect) / len(union)
         return index
-
     return 1 - jaccard_index(vecA, vecB)
 
 
@@ -60,7 +56,7 @@ def cos_distance(vecA, vecB):
 def get_neighbors(train, test, k):
     distances = []
     for x in range(len(train)):
-        dist = euclidean_distance(np.delete(test, -1), np.delete(train[x], -1))
+        dist = cos_distance(np.delete(test, -1), np.delete(train[x], -1))
         distances.append((train[x], dist))
     distances.sort(key=operator.itemgetter(1))
     neighbors = []
@@ -110,7 +106,7 @@ def main():
     # print ('Test set len: ' + repr(len(test_set)))
     predict_result = []
     for x in range(len(test_set)):
-        neighbors = get_neighbors(train_set, test_set[x], 3)
+        neighbors = get_neighbors(train_set, test_set[x], 1)
         print(neighbors)
         result = get_classes(neighbors)
         predict_result.append(result)
