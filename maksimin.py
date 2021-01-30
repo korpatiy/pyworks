@@ -48,75 +48,32 @@ def get_classes(train, class_elem, k, distances):
 
 
 def main():
-    classes = {}
+    classes = []
     data_set = read_file("iris.csv.gz")
     train_set, test_set = split_data(data_set)
     x1 = train_set[0]
     xf, T = get_first_distances(x1, train_set)
-    classes[0] = (x1, 0.0)
-    classes[1] = (xf, 0.0)
-    # classes.append(x1)
-    # classes.append(xf)
-    distances = []
+    classes.append(x1)
+    classes.append(xf)
+
     min_distances = []
     flag = True
 
-    for x in range(len(classes)):
-        distances = []
-        for y in range(len(train_set)):
-            dist = euclidean_distance(classes[x][0], train_set[y])
-            distances.append((train_set[y], dist))
-        classes[x] = distances
-
-
-
-    # distances.sort(key=operator.itemgetter(1), reverse=True)
-
     while flag:
-        for x in range(len(classes)):
-            for y in range(len(train_set)):
-                dist = euclidean_distance(classes[x], train_set[y])
-                classes[x] = (train_set[y], dist)
-
-        distances.sort(key=operator.itemgetter(1), reverse=True)
-        if (distances[0][1]) > T:
-            classes.append(np.delete(distances[0][0], -1))
-        else:
-            flag = False
-
-    if x > 0:
-        cur_dist = distances[y][1]
-        if cur_dist > dist:
-            new_train = np.append(train_set[y], x)
-            distances[y] = (new_train, dist)
-    else:
-        new_train = np.append(train_set[y], x)
-        distances.append((new_train, dist))
+        for point in data_set:
+            distances = []
+            for cur_class in classes:
+                distance = np.linalg.norm(point - cur_class)
+                distances.append((point, distance))
+            min_dist_id = distances.index(min(distances))
+            min_distances.append(distances[min_dist_id])
+        min_distances.sort(key=operator.itemgetter(1), reverse=True)
+        if min_distances[0][1] > T:
+            classes.append(min_distances[0][0])
+        #max_dist = min_distances.index(max(min_distances))
 
 
 
-
-
-    for x in range(len(classes)):
-        for y in range(len(distances)):
-            if distances[y][0][-1] == x:
-                test = distances[y]
-                if distances[y][1] > T:
-                    classes.append(np.delete(distances[y][0], -1))
-                    break
-
-                # np.delete(distances[y][0], -1)
-
-
-
-
-    cnt = 0
-    for x in range(len(distances)):
-        b = distances[x][0][-1]
-        if distances[x][0][-1] == 0:
-            cnt += 1
-    print(cnt)
-    # get_classes(train_set, classes[x], x, distances)
 
 
 main()
