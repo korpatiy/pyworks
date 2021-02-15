@@ -44,6 +44,7 @@ def cos_distance(vecA, vecB):
         for x in range(len(vecB)):
             distance += vecA[x] * vecB[x]
         return distance
+
     return 1 - dotProduct(vecA, vecB) / math.sqrt(dotProduct(vecA, vecA)) / math.sqrt(dotProduct(vecB, vecB))
 
 
@@ -96,7 +97,7 @@ def main():
     train_set, test_set = split_data(data_set)
     predict_result = []
     for x in range(len(test_set)):
-        neighbors = get_neighbors(train_set, test_set[x], 1)
+        neighbors = get_neighbors(train_set, test_set[x], 4)
         print(neighbors)
         result = get_classes(neighbors)
         predict_result.append(result)

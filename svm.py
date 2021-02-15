@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from pygments.lexers.csound import newline
 from sklearn import datasets, preprocessing
 from sklearn.preprocessing import StandardScaler
 
@@ -45,7 +46,29 @@ class SVMSoftMargin:
             self.w = self.w - lr * d_w
             d_b = - self.c * np.sum(y[misclassified_pts_idx])
             self.b = self.b - lr * d_b
-        self.support_vectors = np.where(self.get_margin((x, y)) <= 1)[0]
+        self.support_vectors = np.where(self.get_margin(x, y) <= 1)[0]
+
+    def plot(self):
+        d = {-1: 'green', 1: 'blue'}
+        plt.scatter(self.x[:, 0], self.x[:, 1], c=[d[y] for y in self.y])
+
+        ax = plt.gca()
+        xlim = ax.get_xlim()
+        ylim = ax.get_ylim()
+
+        xx = np.linspace(xlim[0], xlim[1], 30)
+        yy = np.linspace(ylim[0], ylim[1], 30)
+        YY, XX = np.meshgrid(yy, xx)
+        xy = np.vstack([XX.ravel(), YY.ravel()]).T
+        Z = self.decision_function(xy).reshape(XX.shape)
+
+        ax.contour(XX, YY, Z, colors=['r', 'b', 'r'], levels=[-1, 0, 1], alpha=0.5,
+                   linestyles=['--', '-', '--'], linewidths=[2.0, 2.0, 2.0])
+
+        ax.scatter(self.x[:, 0][self.support_vectors], self.x[:, 1][self.support_vectors], s=100,
+                   linewidth=1, facecolors='none', edgecolors='k')
+
+        plt.show()
 
 
 def load_data():
@@ -62,6 +85,7 @@ def load_data():
 if __name__ == '__main__':
     x, y = load_data()
     model = SVMSoftMargin(c=15.0)
+    scaler = StandardScaler()
+    x = scaler.fit_transform(x)
     model.fit(x, y)
-
-    p = 3
+    model.plot()

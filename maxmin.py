@@ -114,8 +114,8 @@ def main():
             flag = False
 
     print('Count of classes = ' + repr(len(classes)))
-    #show_classes_base()
-    show_new_classes(classes, classes_show)
+    show_classes_base()
+    #show_new_classes(classes, classes_show)
     # max_dist = min_distances.index(max(min_distances))
 
 
