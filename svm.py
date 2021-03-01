@@ -29,22 +29,19 @@ class SVMSoftMargin:
     def cost(self, margin):
         return self.c * np.sum(np.maximum(0, 1 - margin)) + self.w.dot(self.w) / 2.0
 
-    def fit(self, x, y, lr=0.001, epochs=100):
+    def fit(self, x, y, lr=0.001, epochs=500):
         self.x = x
         self.y = y
         self.n, self.d = x.shape
         self.w = np.random.randn(self.d)
         self.b = 0
 
-        loss_array = []
         for i in range(epochs):
             margin = self.get_margin(x, y)
-            loss = self.cost(margin)
-            loss_array.append(loss)
-            misclassified_pts_idx = np.where(margin < 1)[0]
-            d_w = self.w - self.c * y[misclassified_pts_idx].dot(x[misclassified_pts_idx])
+            misclassified_idx = np.where(margin < 1)[0]
+            d_w = self.w - self.c * y[misclassified_idx].dot(x[misclassified_idx])
             self.w = self.w - lr * d_w
-            d_b = - self.c * np.sum(y[misclassified_pts_idx])
+            d_b = - self.c * np.sum(y[misclassified_idx])
             self.b = self.b - lr * d_b
         self.support_vectors = np.where(self.get_margin(x, y) <= 1)[0]
 
@@ -75,6 +72,7 @@ def load_data():
     iris = sns.load_dataset("iris")
     # iris = datasets.load_iris()
     iris = iris.tail(100)
+    #iris = iris.head(100)
     le = preprocessing.LabelEncoder()
     y = le.fit_transform(iris["species"])
     y[y == 0] = -1
@@ -82,10 +80,12 @@ def load_data():
     return iris.values, y
 
 
-if __name__ == '__main__':
+def main():
     x, y = load_data()
-    model = SVMSoftMargin(c=15.0)
+    model = SVMSoftMargin(c=1000.0)
     scaler = StandardScaler()
     x = scaler.fit_transform(x)
     model.fit(x, y)
     model.plot()
+
+main()

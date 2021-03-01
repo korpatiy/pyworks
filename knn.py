@@ -97,7 +97,7 @@ def main():
     train_set, test_set = split_data(data_set)
     predict_result = []
     for x in range(len(test_set)):
-        neighbors = get_neighbors(train_set, test_set[x], 4)
+        neighbors = get_neighbors(train_set, test_set[x], 1)
         print(neighbors)
         result = get_classes(neighbors)
         predict_result.append(result)
