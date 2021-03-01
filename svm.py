@@ -49,7 +49,7 @@ class SVMSoftMargin:
         self.support_vectors = np.where(self.get_margin(x, y) <= 1)[0]
 
     def plot(self):
-        d = {-1: 'green', 1: 'blue'}
+        d = {-1: 'green', 1: 'red'}
         plt.scatter(self.x[:, 0], self.x[:, 1], c=[d[y] for y in self.y])
 
         ax = plt.gca()
