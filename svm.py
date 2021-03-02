@@ -45,6 +45,13 @@ class SVMSoftMargin:
             self.b = self.b - lr * d_b
         self.support_vectors = np.where(self.get_margin(x, y) <= 1)[0]
 
+    def predict(self, X):
+        return np.sign(self.decision_function(X))
+
+    def score(self, X, y):
+        P = self.predict(X)
+        return np.mean(y == P)
+
     def plot(self):
         d = {-1: 'green', 1: 'red'}
         plt.scatter(self.x[:, 0], self.x[:, 1], c=[d[y] for y in self.y])
@@ -86,6 +93,7 @@ def main():
     scaler = StandardScaler()
     x = scaler.fit_transform(x)
     model.fit(x, y)
+    print("train score:", model.score(x, y))
     model.plot()
 
 main()
