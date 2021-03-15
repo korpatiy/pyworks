@@ -81,30 +81,6 @@ def cross_valid(x):
         print("matrix #" + repr(idx + 1))
         print(accuracy_score(y_test, KNN_predict))
 
-def roc(y_true, y_pred):
-    X = [1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1]
-    Y = [1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1]
-    Zx, Zy = zip(*[(x, y) for x, y in sorted(zip(X, Y))])
-    score = np.array(Zx)
-    y = np.array(Zy)
-    fpr = []
-    tpr = []
-    P = sum(y)
-    N = len(y) - P
-    FP = 0
-    TP = 0
-    for i in range(len(score)):
-        if y[i] == 1:
-            TP = TP + 1
-        if y[i] == 0:
-            FP = FP + 1
-        fpr.append(FP / float(N))
-        tpr.append(TP / float(P))
-    plt.plot(fpr, tpr)
-    plt.title("ROC Curve")
-    plt.xlabel("False positive rate")
-    plt.ylabel("True Positive Rate")
-    plt.show()
 
 def main():
     iris = sns.load_dataset("iris")
