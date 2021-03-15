@@ -1,6 +1,7 @@
 import numpy as np
 import seaborn as sns
 import pandas as pd
+from matplotlib import pyplot as plt
 from sklearn.cluster import KMeans
 from sklearn.metrics import roc_curve, confusion_matrix, classification_report, accuracy_score
 from sklearn.model_selection import train_test_split, cross_val_score
@@ -11,7 +12,6 @@ from sklearn.svm import LinearSVC
 from sklearn.utils import shuffle
 
 np.seterr(divide='ignore', invalid='ignore')
-
 
 def p_r_f1(labels, y_true, y_pred):
     tp = y_true == y_pred
@@ -78,9 +78,33 @@ def cross_valid(x):
         KNN_model = KNeighborsClassifier(n_neighbors=5)
         KNN_model.fit(x_train, y_train)
         KNN_predict = KNN_model.predict(x_test)
-        print("matrix #" + repr(idx+1))
+        print("matrix #" + repr(idx + 1))
         print(accuracy_score(y_test, KNN_predict))
 
+def roc(y_true, y_pred):
+    X = [1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1]
+    Y = [1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1]
+    Zx, Zy = zip(*[(x, y) for x, y in sorted(zip(X, Y))])
+    score = np.array(Zx)
+    y = np.array(Zy)
+    fpr = []
+    tpr = []
+    P = sum(y)
+    N = len(y) - P
+    FP = 0
+    TP = 0
+    for i in range(len(score)):
+        if y[i] == 1:
+            TP = TP + 1
+        if y[i] == 0:
+            FP = FP + 1
+        fpr.append(FP / float(N))
+        tpr.append(TP / float(P))
+    plt.plot(fpr, tpr)
+    plt.title("ROC Curve")
+    plt.xlabel("False positive rate")
+    plt.ylabel("True Positive Rate")
+    plt.show()
 
 def main():
     iris = sns.load_dataset("iris")
