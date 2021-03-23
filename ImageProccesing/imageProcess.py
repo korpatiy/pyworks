@@ -14,17 +14,27 @@ def get_images():
     return symbol_pack
 
 
-def process_image(image, filename):
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    image = cv2.GaussianBlur(image, (5, 5), 0)
-    if (image == 0).all():
-        return None
-    else:
-        image = cv2.threshold(image, image.mean(), 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
-        if image[-1, -1] == 0:
-            image = cv2.bitwise_not(image)
+def contours(thresh):
+    cnts = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cnts = cnts[0] if len(cnts) == 2 else cnts[1]
+    c = max(cnts, key=cv2.contourArea)
 
-    return cv2.resize(image, (32, 32), cv2.INTER_NEAREST)
+    left = tuple(c[c[:, :, 0].argmin()][0])
+    right = tuple(c[c[:, :, 0].argmax()][0])
+    top = tuple(c[c[:, :, 1].argmin()][0])
+    bottom = tuple(c[c[:, :, 1].argmax()][0])
+
+
+def process_image(image, filename):
+    blur = cv2.GaussianBlur(image, (3, 3), 0)
+    gray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)
+    thresh = cv2.threshold(gray, gray.mean(), 255, cv2.THRESH_BINARY_INV)[1]
+    x, y, w, h = cv2.boundingRect(thresh)
+    cropped_image = thresh[y:y + h, x:x + w]
+    if cropped_image[-1, -1] == 0:
+        cropped_image = cv2.bitwise_not(cropped_image)
+    resized_image = cv2.resize(cropped_image, (32, 32), cv2.INTER_NEAREST)
+    return resized_image
 
 
 def work_process():
