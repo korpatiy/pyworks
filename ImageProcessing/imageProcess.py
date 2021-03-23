@@ -1,6 +1,5 @@
 import os
-import numpy as np
-from PIL import Image, ImageChops, ImageEnhance
+
 import cv2
 
 
@@ -31,7 +30,7 @@ def process_image(image, filename):
     thresh = cv2.threshold(gray, gray.mean(), 255, cv2.THRESH_BINARY_INV)[1]
     x, y, w, h = cv2.boundingRect(thresh)
     cropped_image = thresh[y:y + h, x:x + w]
-    if cropped_image[-1, -1] == 0:
+    if thresh[-1, -1] == 0:
         cropped_image = cv2.bitwise_not(cropped_image)
     resized_image = cv2.resize(cropped_image, (32, 32), cv2.INTER_NEAREST)
     return resized_image
@@ -66,6 +65,5 @@ def work_process():
 
 def main():
     work_process()
-
 
 main()
