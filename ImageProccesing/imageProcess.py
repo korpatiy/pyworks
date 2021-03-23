@@ -14,31 +14,17 @@ def get_images():
     return symbol_pack
 
 
-def crop_image(im):
-    bg = Image.new(im.mode, im.size, im.getpixel((0, 0)))
-    diff = ImageChops.difference(im, bg)
-    diff = ImageChops.add(diff, diff, 2.0, 0)
-    bbox = diff.getbbox()
-    left, upper, right, lower = bbox
-    w, h = im.size
-    bbox_new = (0, upper, w, lower)
-    if bbox:
-        return im.crop(bbox_new)
+def process_image(image, filename):
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    image = cv2.GaussianBlur(image, (5, 5), 0)
+    if (image == 0).all():
+        return None
     else:
-        print("error getbbox")
+        image = cv2.threshold(image, image.mean(), 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+        if image[-1, -1] == 0:
+            image = cv2.bitwise_not(image)
 
-
-def black_white(image):
-    fn = lambda x: 255 if x > 200 else 0
-    image = image.convert('L').point(fn, mode='1')
-    return image
-
-
-def process_image(image):
-    image = crop_image(image)
-    image = image.resize((128, 128), Image.ANTIALIAS)
-    image = black_white(image)
-    return image
+    return cv2.resize(image, (32, 32), cv2.INTER_NEAREST)
 
 
 def work_process():
@@ -46,12 +32,11 @@ def work_process():
     processed_images = {}
     for symbol, filenames in symbol_pack.items():
         for filename in filenames:
-            image = Image.open(filename)
-            # image = cv2.imread(filename, cv2.IMREAD_GRAYSCALE)
+            image = cv2.imread(filename)
             if image is None:
                 print("image " + filename + " not opened")
                 continue
-            new_image = process_image(image)
+            new_image = process_image(image, filename)
             if symbol not in processed_images:
                 processed_images[symbol] = []
             processed_images[symbol].append(new_image)
@@ -64,8 +49,8 @@ def work_process():
             os.makedirs(symbol)
         i = 0
         for image in images:
-            image.save(symbol + "/" + repr(i) + ".png")
-            # cv2.imwrite(symbol + "/" + repr(i) + ".png", image)
+            if image is not None:
+                cv2.imwrite(symbol + "/" + repr(i) + ".png", image)
             i += 1
 
 
