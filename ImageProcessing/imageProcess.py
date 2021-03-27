@@ -1,5 +1,5 @@
 import os
-
+import numpy as np
 import cv2
 
 
@@ -24,7 +24,8 @@ def contours(thresh):
     bottom = tuple(c[c[:, :, 1].argmax()][0])
 
 
-def process_image(image, filename):
+def process_image(image):
+    n = 16
     blur = cv2.GaussianBlur(image, (3, 3), 0)
     gray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)
     thresh = cv2.threshold(gray, gray.mean(), 255, cv2.THRESH_BINARY_INV)[1]
@@ -32,8 +33,14 @@ def process_image(image, filename):
     cropped_image = thresh[y:y + h, x:x + w]
     if thresh[-1, -1] == 0:
         cropped_image = cv2.bitwise_not(cropped_image)
-    resized_image = cv2.resize(cropped_image, (32, 32), cv2.INTER_NEAREST)
-    return resized_image
+    resized_image = cv2.resize(cropped_image, (n - 1, n - 1), cv2.INTER_NEAREST)
+
+    result_image = np.zeros((n, n), np.uint8)
+    result_image = cv2.bitwise_not(result_image)
+    offset_x = (n - resized_image.shape[1]) // 2
+    offset_y = (n - resized_image.shape[0]) // 2
+    result_image[offset_x:offset_x + resized_image.shape[1], offset_y:offset_y + resized_image.shape[0]] = resized_image
+    return result_image
 
 
 def work_process():
@@ -45,7 +52,7 @@ def work_process():
             if image is None:
                 print("image " + filename + " not opened")
                 continue
-            new_image = process_image(image, filename)
+            new_image = process_image(image)
             if symbol not in processed_images:
                 processed_images[symbol] = []
             processed_images[symbol].append(new_image)
@@ -65,5 +72,6 @@ def work_process():
 
 def main():
     work_process()
+
 
 main()

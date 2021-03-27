@@ -3,7 +3,7 @@ import numpy as np
 
 import cv2
 
-b_color = np.array([255, 255, 255])
+b_color = np.array([0, 0, 0])
 g_color = np.array([0, 255, 0])
 y_color = np.array([255, 255, 0])
 r_color = np.array([255, 0, 0])
@@ -20,14 +20,22 @@ def get_images():
 
 
 def get_first_point(image):
-    blur = cv2.GaussianBlur(image, (3, 3), 0)
-    gray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)
-    thresh = cv2.threshold(gray, gray.mean(), 255, cv2.THRESH_BINARY_INV)[1]
-    x, y, w, h = cv2.boundingRect(thresh)
+    height, width, _ = image.shape
+    x = -1
+    y = -1
+    for i in range(height):
+        for j in range(width):
+            if np.array_equal(image[i, j], b_color):
+                x = i
+                y = j
+                break
+            if x != -1:
+                break
     return x, y
 
 
 def neighbour(x, y, image):
+    n = 16
     dirX = np.array([0, 1, 1, 1, 0, -1, -1, -1])
     dirY = np.array([1, 1, 0, -1, -1, -1, 0, 1])
     way = 0
@@ -37,14 +45,14 @@ def neighbour(x, y, image):
     new_x = 0
     new_y = 0
     for i in range(len(dirY)):
-        newX = (x + dirX[i] + 32) % 32
-        newY = (y + dirY[i] + 32) % 32
+        newX = (x + dirX[i] + n) % n
+        newY = (y + dirY[i] + n) % n
         if np.array_equal(image[newX, newY], b_color):
             count += 1
             if not found:
                 way = c_way
-                new_x = x + newX
-                new_y = y + newY
+                new_x = newX
+                new_y = newY
                 found = True
         else:
             c_way += 1
@@ -54,12 +62,12 @@ def neighbour(x, y, image):
 def get_bypass_string(image, filename):
     bypass_string = ""
     head = None
-    curr_point = None
-    next_point = get_first_point(image)
+    curr_point = get_first_point(image)
+    next_point = curr_point
     other_point = None
 
     point_list = []
-    while curr_point != next_point:
+    while True:
         curr_point = next_point
         if np.array_equal(image[curr_point], b_color):
             image[curr_point] = r_color
@@ -68,18 +76,18 @@ def get_bypass_string(image, filename):
             point_list.append(curr_point)
             if head is not None:
                 bypass_string = bypass_string + "("
-                next_point = point_list[-1]
+                next_point = head
                 other_point, way, count = neighbour(next_point[0], next_point[1], image)
                 if count == 1:
                     next_point = y_color
                     head = point_list[-1]
                 if head is None:
-                    head = curr_point
+                    head = point_list[-1]
                 else:
                     point_list.append(curr_point)
-                    curr_point = g_color
+                image[curr_point] = g_color
             else:
-                head = curr_point
+                head = point_list[-1]
                 image[curr_point] = g_color
             bypass_string = bypass_string + "("
         if curr_point == next_point and head is not None:
@@ -87,6 +95,8 @@ def get_bypass_string(image, filename):
             bypass_string = bypass_string + ")"
             bypass_string = bypass_string + "("
         bypass_string = bypass_string + repr(way)
+        if curr_point == next_point:
+            break
     return 0
 
 
