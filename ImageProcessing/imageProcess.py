@@ -55,8 +55,8 @@ def work_process():
             new_image = process_image(image)
             if symbol not in processed_images:
                 processed_images[symbol] = []
-            processed_images[symbol].append(new_image)
-    new_dir = "processed_train"
+            processed_images[symbol].append(image)
+    new_dir = "parsed_images"
     if not os.path.isdir(new_dir):
         os.mkdir(new_dir)
     os.chdir(new_dir)

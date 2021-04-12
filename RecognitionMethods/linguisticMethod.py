@@ -59,7 +59,7 @@ def neighbour(x, y, image):
     return (new_x, new_y), way, count
 
 
-def get_bypass_string(image, filename):
+def get_bypass_string(image):
     bypass_string = ""
     head = None
     curr_point = get_first_point(image)

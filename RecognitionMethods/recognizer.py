@@ -40,5 +40,4 @@ def main():
             print("Original symbol is " + filename[0] + " recognized is " + symbol)
 
 
-
 main()
